@@ -12,9 +12,9 @@ COMMON_H=help.h ubx.h ubx_io.h
 gta02-agps-dump: ${COMMON_H}
 gta02-agps-load: ${COMMON_H}
 
-help.h: help.h.tpl README
+help.h: help.h.tpl README.md
 	head -n 6 help.h.tpl > help.h
-	head -n 29 README | sed -e 's/"/\\"/g' -e 's/^/"/' -e 's/$$/\\n"/' >> help.h
+	head -n 29 README.md | sed -e 's/"/\\"/g' -e 's/^/"/' -e 's/$$/\\n"/' >> help.h
 	tail -n 6 help.h.tpl >> help.h
 
 clean:
