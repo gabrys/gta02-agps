@@ -112,7 +112,7 @@ int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg) {
     }
     if (alm_dumped && eph_dumped && hui_dumped && ecef_dumped) {
         if (VERBOSE) {
-            fprintf(stderr, "Dumped messages: %d AID-ALM, %d AID-EPH, %d AID-HUI, %d NAV_POSECEF",
+            fprintf(stderr, "Dumped messages: %d AID-ALM, %d AID-EPH, %d AID-HUI, %d NAV_POSECEF\n",
                 alm_dumped, eph_dumped, hui_dumped, ecef_dumped
             );
         }
