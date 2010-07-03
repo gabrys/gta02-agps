@@ -1,0 +1,12 @@
+gta02-agps* are programs to help geting faster fix
+after powering on (TTFF) the GTA02 FreeRunner GPS.
+
+There is a Python version in python/ directory and
+a C port in c/ directory.
+
+They differ only a little, so you probably want a
+C version for using and Python for learning on how
+it works.
+
+Consult READMEs in c/ and python/ directories for
+more details.
