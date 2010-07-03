@@ -14,7 +14,7 @@ gta02-agps-load: ${COMMON_H}
 
 help.h: help.h.tpl README
 	head -n 6 help.h.tpl > help.h
-	head -n 23 README | sed -e 's/"/\\"/g' -e 's/^/"/' -e 's/$$/\\n"/' >> help.h
+	head -n 29 README | sed -e 's/"/\\"/g' -e 's/^/"/' -e 's/$$/\\n"/' >> help.h
 	tail -n 6 help.h.tpl >> help.h
 
 clean:

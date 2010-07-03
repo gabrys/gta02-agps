@@ -1,4 +1,5 @@
 INFORMATION
+===========
 
 This program can set up the UBX GPS chip to obtain
 faster fix after powering on (TTFF). To do this it
@@ -7,7 +8,7 @@ needs AGPS information.
 The AGPS information can be grabbed from GPS chip
 when it has fix (reports valid position). Do:
 
-./gta02-agps.py --dump agpsdata < /dev/ttySAC1 > /dev/ttySAC1
+    ./gta02-agps.py --dump agpsdata < /dev/ttySAC1 > /dev/ttySAC1
 
 This will save AGPS data read from chip into the
 file "agpsdata".
@@ -17,15 +18,17 @@ stopped and started again. This should improve TTFF.
 
 To load data from agpsdata file issue:
 
-./gta02-agps.py --load agpsdata < /dev/ttySAC1 > /dev/ttySAC1
+    ./gta02-agps.py --load agpsdata < /dev/ttySAC1 > /dev/ttySAC1
 
 PURPOSE
+=======
 
 This code is quite functional, but is published
 mostly as a reference for understanding AGPS
 load/dump possibilities for UBX chips.
 
 DEPENDENCIES
+============
 
 This code depends on standard python modules,
 no serial port libraries are needed, since we
@@ -33,6 +36,7 @@ use /dev/ttySAC1 as normal file (it should be
 configured right by the system).
 
 PROBLEMS
+========
 
 Sometime (especially when using --reset and
 --load at the same time) aid data request is
@@ -47,6 +51,7 @@ Python dictiorary with data. This should be
 probably saved in more portable format.
 
 LICENSE
+=======
 
 Code licensed on GPLv2 or later. Written by:
 

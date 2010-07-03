@@ -7,6 +7,7 @@ void help() {
 "gta02-apgs-dump, gta02-agps-load\n"
 "\n"
 "INFORMATION\n"
+"===========\n"
 "\n"
 "These programs can set up the UBX GPS chip to obtain\n"
 "faster fix after powering on (TTFF). To do this it\n"
@@ -15,7 +16,7 @@ void help() {
 "The AGPS information can be grabbed from GPS chip\n"
 "when it has fix (reports valid position). Do:\n"
 "\n"
-"gta02-agps-dump agpsdata < /dev/ttySAC1 > /dev/ttySAC1\n"
+"    gta02-agps-dump agpsdata < /dev/ttySAC1 > /dev/ttySAC1\n"
 "\n"
 "This will save AGPS data read from chip into the\n"
 "file \"agpsdata\".\n"
@@ -25,8 +26,7 @@ void help() {
 "\n"
 "To load data from agpsdata file issue:\n"
 "\n"
-"gta02-agps-load agpsdata < /dev/ttySAC1 > /dev/ttySAC1\n"
-"\n"
+"    gta02-agps-load agpsdata < /dev/ttySAC1 > /dev/ttySAC1\n"
     
     ;
 

@@ -1,6 +1,7 @@
 gta02-apgs-dump, gta02-agps-load
 
 INFORMATION
+===========
 
 These programs can set up the UBX GPS chip to obtain
 faster fix after powering on (TTFF). To do this it
@@ -9,7 +10,7 @@ needs AGPS information.
 The AGPS information can be grabbed from GPS chip
 when it has fix (reports valid position). Do:
 
-gta02-agps-dump agpsdata < /dev/ttySAC1 > /dev/ttySAC1
+    gta02-agps-dump agpsdata < /dev/ttySAC1 > /dev/ttySAC1
 
 This will save AGPS data read from chip into the
 file "agpsdata".
@@ -19,9 +20,15 @@ stopped and started again. This should improve TTFF.
 
 To load data from agpsdata file issue:
 
-gta02-agps-load agpsdata < /dev/ttySAC1 > /dev/ttySAC1
+    gta02-agps-load agpsdata < /dev/ttySAC1 > /dev/ttySAC1
+
+Passing -h or --help argument gives you this message.
+
+Passing -v or --verbose argument prints some debug
+information while operating.
 
 STORAGE FORMAT
+==============
 
 AGPS data is saved as UBX messages (the same format
 you communicate with the device). For AID_ALM and
@@ -34,19 +41,25 @@ needs to read the messages from file and parse them,
 but that's not such a big problem.
 
 COMPILING
+=========
 
 Compile programs with:
 
-gcc -falign-struct gta02-agps-dump.c -o gta02-agps-dump
-gcc -falign-struct gta02-agps-load.c -o gta02-load-dump
+    gcc -falign-struct gta02-agps-dump.c -o gta02-agps-dump
+    gcc -falign-struct gta02-agps-load.c -o gta02-load-dump
 
 -falign-struct is needed, because one of the structs
 in ubx.h is not properly aligned and so will be
 padded if -falign-struct is not passed.
 
-Makefile should do the job.
+Makefile should do the job, just type:
+
+    make
+
+To have things compiled.
 
 LICENSE
+=======
 
 Code licensed on GPLv2 or later. Written by:
 
