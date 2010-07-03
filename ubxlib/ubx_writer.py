@@ -32,5 +32,5 @@ class UBXWriter( object ):
                     stream = stream + struct.pack(fmt_rep[1], *[payload_rep[i][j] for j in fmt_rep[2]])
         stream = stream + struct.pack("<BB", *checksum( stream[2:] ))
         self.file.write( stream )
-        #self.file.flush()
+        self.file.flush()
 
