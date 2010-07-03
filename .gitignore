@@ -1,1 +1,3 @@
-ubxlib/*.pyc
+python/ubxlib/*.pyc
+c/gta02-agps-dump
+c/gta02-agps-load
