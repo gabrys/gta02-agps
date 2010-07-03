@@ -10,10 +10,12 @@
 
 int DUMP_FD;
 
+int alm_got = 0;
 int alm_dumped = 0;
+int eph_got = 0;
 int eph_dumped = 0;
-int hui_dumped = 0;
-int ecef_dumped = 0;
+int hui_got = 0;
+int ecef_got = 0;
 
 int VERBOSE = 0;
 
@@ -85,35 +87,37 @@ int main(int argc, char **argv) {
 
 int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg) {
     if (msg_is(header, UBXID_AID_ALM)) {
-        alm_dumped++;
+        alm_got++;
         if (header->size == 40) {
+            alm_dumped++;
             ubx_write(DUMP_FD, UBXID_AID_ALM, header->size, msg);
         }
     }
     if (msg_is(header, UBXID_AID_EPH)) {
-        eph_dumped++;
+        eph_got++;
         if (header->size == 104) {
+            eph_dumped++;
             ubx_write(DUMP_FD, UBXID_AID_EPH, header->size, msg);
         }
     }
     if (msg_is(header, UBXID_AID_HUI)
         && header->size == sizeof(GPS_UBX_AID_HUI_t)
-        && ! hui_dumped /* only one HUI needed */
+        && ! hui_got /* only one HUI needed */
     ) {
         ubx_write(DUMP_FD, UBXID_AID_HUI, header->size, msg);
-        hui_dumped = 1;
+        hui_got = 1;
     }
     if (msg_is(header, UBXID_NAV_POSECEF)
         && header->size == sizeof(GPS_UBX_NAV_POSECEF_t)
-        && ! ecef_dumped /* only one ECEF needed */
+        && ! ecef_got /* only one ECEF needed */
     ) {
         ubx_write(DUMP_FD, UBXID_NAV_POSECEF, header->size, msg);
-        ecef_dumped = 1;
+        ecef_got = 1;
     }
-    if (alm_dumped && eph_dumped && hui_dumped && ecef_dumped) {
+    if (alm_got && eph_got && hui_got && ecef_got) {
         if (VERBOSE) {
-            fprintf(stderr, "Dumped messages: %d AID-ALM, %d AID-EPH, %d AID-HUI, %d NAV_POSECEF\n",
-                alm_dumped, eph_dumped, hui_dumped, ecef_dumped
+            fprintf(stderr, "Got/dumped messages: %d/%d AID-ALM, %d/%d AID-EPH, %d/%d AID-HUI, %d/%d NAV-POSECEF\n",
+                alm_got, alm_dumped, eph_got, eph_dumped, hui_got, hui_got, ecef_got, ecef_got
             );
         }
         return 1;
