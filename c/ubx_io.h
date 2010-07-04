@@ -118,6 +118,7 @@ void ubx_read(int fd) {
             || chksum2 != *(msg + header->size + 1)
         ) {
             /* wrong checksum, maybe not UBX */
+            write(2, "Wrong checksum\n", strlen("Wrong checksum\n"));
             buffer += 2;
             continue;
         }
