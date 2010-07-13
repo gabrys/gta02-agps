@@ -1,3 +1,6 @@
 python/ubxlib/*.pyc
 c/gta02-agps-dump
 c/gta02-agps-load
+c/gta02-set-power
+c/stdin-serial-set-raw
+

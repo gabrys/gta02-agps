@@ -1,86 +1,25 @@
 #include <time.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <stdio.h>
 #include <signal.h>
 #include <sys/stat.h>
 
-#include "ubx.h"
-#include "help.h"
-#include "ubx_io.h"
-#include "dev_config.h"
+#include "common.h"
 
 int DUMP_FD;
-
-int AID_DATA_TIMEOUT_S = 10;                       
-/* 10 seconds to wait for AID_DATA request */
-
-/*
-    NOTE: some testing is needed to better understand how much 
-    accuracy parameters are important for UBX chip.
-*/
-
-int POSITION_ACCURACY_MIN_CM = 5 * 1000 * 100; /* 5 km, in cm */
-/*
-    if last recorded position accuracy was less that POSITION_ACCURACY_MIN_CM,
-    send POSITION_ACCURACY_MIN_CM as position accuracy.
-    
-    This is how far you can go between turning off and on the GPS chip.
-*/
-
-int POSITION_ACCURACY_MAX_CM = 200 * 1000 * 100; /* 200 km in cm */
-/*
-    if position accuracy is more than POSITION_ACCURACY_MAX_CM,
-    don't send the last position to GPS at all.
-*/
-
-int TIME_ACCURACY_MS = 10 * 60 * 1000; /* 10 minutes in ms */
-/*
-    system time accuracy in ms.
-    
-    If you have your time desynchronized by 10 minutes, you should
-    definitely notice it and set the time.
-    
-    If you have your system time synchronized via NTP (recommenended)
-    you can set TIME_ACCURACY_NS to 10000 (which is 10 seconds)
-    or even less.
-*/
-
-int VERBOSE = 0;
-
-#define log(msg) if (VERBOSE) write(2, msg "\n", strlen(msg) + 1)
 
 void onalarm(int signum) {
     log("Device has not asked for aid data. Probably it is already set up.");
     exit(2);
 }
 
+int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg);
+
 int main(int argc, char **argv) {
     GPS_UBX_CFG_MSG_SETCURRENT_t cfg_msg;
     
-    /* -h, --help, no args, print help */
-    if (argc < 2 || argc > 3 || strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
-        help();
-        return 0;
-    }
-
-    /* -v, --verbose */
-    if (strcmp(argv[1], "--verbose") == 0 || strcmp(argv[1], "-v") == 0) {
-        if (argc == 3) {
-            VERBOSE = 1;
-            argv[1] = argv[2];
-        } else {
-            help();
-            return 3;
-        }
-    } else if (argc == 3) {
-        if (strcmp(argv[2], "--verbose") == 0 || strcmp(argv[2], "-v") == 0) {
-            VERBOSE = 1;
-        } else {
-            help();
-            return 3;
-        }
-    }
+    /* parse --verbose and --help */
+    parse_common_args(&argc, argv, 1, 1);
 
     /* open dump file */
     DUMP_FD = open(argv[1], O_RDONLY);
@@ -101,7 +40,7 @@ int main(int argc, char **argv) {
     signal(SIGALRM, onalarm);
     alarm(AID_DATA_TIMEOUT_S);
     
-    ubx_read(DEV_FD_IN);
+    ubx_read(DEV_FD_IN, handle_message);
     
     close(DUMP_FD);
     return 0;
@@ -119,7 +58,7 @@ int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg) {
     
     if (fd == DEV_FD_IN && msg_is(header, UBXID_AID_DATA)) {
         /* got request for data, let's read it from file */
-        ubx_read(DUMP_FD);
+        ubx_read(DUMP_FD, handle_message);
         return 1;
     }
     if (fd == DUMP_FD && msg_is(header, UBXID_AID_ALM)) {

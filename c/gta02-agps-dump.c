@@ -1,12 +1,8 @@
 #include <fcntl.h>
 #include <errno.h>
-#include <stdio.h>
 #include <sys/stat.h>
 
-#include "ubx.h"
-#include "help.h"
-#include "ubx_io.h"
-#include "dev_config.h"
+#include "common.h"
 
 int DUMP_FD;
 
@@ -17,36 +13,13 @@ int eph_dumped = 0;
 int hui_got = 0;
 int ecef_got = 0;
 
-int VERBOSE = 0;
-
-#define log(msg) if (VERBOSE) write(2, msg "\n", strlen(msg) + 1)
+int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg);
 
 int main(int argc, char **argv) {
     GPS_UBX_CFG_MSG_SETCURRENT_t cfg_msg;
     
-    /* -h, --help, no args, print help */
-    if (argc < 2 || argc > 3 || strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
-        help();
-        return 0;
-    }
-
-    /* -v, --verbose */
-    if (strcmp(argv[1], "--verbose") == 0 || strcmp(argv[1], "-v") == 0) {
-        if (argc == 3) {
-            VERBOSE = 1;
-            argv[1] = argv[2];
-        } else {
-            help();
-            return 3;
-        }
-    } else if (argc == 3) {
-        if (strcmp(argv[2], "--verbose") == 0 || strcmp(argv[2], "-v") == 0) {
-            VERBOSE = 1;
-        } else {
-            help();
-            return 3;
-        }
-    }
+    /* parse --help and --verbose */
+    parse_common_args(&argc, argv, 1, 1);
     
     /* open dump file */
     DUMP_FD = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -69,7 +42,7 @@ int main(int argc, char **argv) {
     ubx_write(DEV_FD_OUT, UBXID_CFG_MSG, sizeof(GPS_UBX_CFG_MSG_SETCURRENT_t), (char*) &cfg_msg);
 
     /* start read loop */
-    ubx_read(DEV_FD_IN);
+    ubx_read(DEV_FD_IN, handle_message);
 
     /* disable ECEF messages */
     cfg_msg.rate = 0;
@@ -115,11 +88,9 @@ int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg) {
         ecef_got = 1;
     }
     if (alm_got && eph_got && hui_got && ecef_got) {
-        if (VERBOSE) {
-            fprintf(stderr, "Got/dumped messages: %d/%d AID-ALM, %d/%d AID-EPH, %d/%d AID-HUI, %d/%d NAV-POSECEF\n",
-                alm_got, alm_dumped, eph_got, eph_dumped, hui_got, hui_got, ecef_got, ecef_got
-            );
-        }
+        logf("Got/dumped messages: %d/%d AID-ALM, %d/%d AID-EPH, %d/%d AID-HUI, %d/%d NAV-POSECEF\n",
+            alm_got, alm_dumped, eph_got, eph_dumped, hui_got, hui_got, ecef_got, ecef_got
+        );
         return 1;
     }
     return 0;

@@ -27,6 +27,12 @@ void help() {
 "To load data from agpsdata file issue:\n"
 "\n"
 "    gta02-agps-load agpsdata < /dev/ttySAC1 > /dev/ttySAC1\n"
+"\n"
+"Passing -h or --help argument gives you this message.\n"
+"\n"
+"Passing -v or --verbose argument prints some debug\n"
+"information while operating.\n"
+"\n"
     
     ;
 

@@ -27,6 +27,36 @@ Passing -h or --help argument gives you this message.
 Passing -v or --verbose argument prints some debug
 information while operating.
 
+Before using this programs (especially gta02-agps-dump)
+you need to properly set the serial port. You can
+do this by:
+
+    stty -F /dev/ttySAC1 raw
+
+In case you do not have stty program, you can use
+the one supplied in the package:
+
+    stdin-serial-set-raw < /dev/ttySAC1
+
+In order to get even faster fixes you can enable
+FixNow(R) technology. When you intend to disable
+the GPS, you can put it to a kind of stand-by mode
+instead. Waking up (instead of doing power on) gives
+you TTFF of 10 seconds range.
+
+Instead of disabling GPS, do:
+
+    gta02-set-power fixnow > /dev/ttySAC1
+
+Instead of enabling it again, do:
+
+    gta02-set-power max > /dev/ttySAC1
+
+You need to have GPS powered on to do this kind
+of things. Note this will drain some current, but
+it should be minimal (comparing to GPS fully powered
+on).
+
 STORAGE FORMAT
 ==============
 

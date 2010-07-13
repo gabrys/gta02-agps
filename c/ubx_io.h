@@ -8,9 +8,6 @@
 
 #include "ubx.h"
 
-/* header only, implement in calling file! */
-int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg);
-
 void panic(char *msg) {
     write(2, msg, strlen(msg));
     write(2, "\n", 1);
@@ -48,7 +45,7 @@ int msg_is(GPS_UBX_HEAD_pt header, int UBXID) {
         && header->classId == UBXID / 256;
 }
 
-void ubx_read(int fd) {
+void ubx_read(int fd, int (* handle_message)(int, GPS_UBX_HEAD_pt, char *)) {
     char buffer_start[16 * 1024];
     char *buffer;
     char *buffer_end;
@@ -118,7 +115,9 @@ void ubx_read(int fd) {
             || chksum2 != *(msg + header->size + 1)
         ) {
             /* wrong checksum, maybe not UBX */
-            write(2, "Wrong checksum\n", strlen("Wrong checksum\n"));
+            write(2,   "Wrong checksum. You probably need to set up the serial port.\n",
+                strlen("Wrong checksum. You probably need to set up the serial port.\n")
+            );
             buffer += 2;
             continue;
         }
