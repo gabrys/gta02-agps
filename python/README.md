@@ -53,7 +53,7 @@ probably saved in more portable format.
 LICENSE
 =======
 
-Code licensed on GPLv2 or later. Written by:
+Code licensed on GPLv2. Written by:
 
 (C) 2010 Piotr Gabryjeluk <piotr@gabryjeluk.pl>
 
@@ -62,5 +62,5 @@ Based on Open GPS Daemon by
 (C) 2008 Jan 'Shoragan' Lübbe <jluebbe@lasnet.de>
 (C) 2008 Daniel Willmann <daniel@totalueberwachung.de>
 (C) 2008 Openmoko, Inc.
-licensed on GPLv2 or later
+licensed on GPLv2
 
