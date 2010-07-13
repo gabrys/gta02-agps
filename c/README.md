@@ -1,4 +1,4 @@
-gta02-apgs-dump, gta02-agps-load
+gta02-apgs-dump, gta02-agps-load, gta02-set-power, stdin-serial-set-raw
 
 INFORMATION
 ===========
