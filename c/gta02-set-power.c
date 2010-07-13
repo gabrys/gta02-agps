@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
     GPS_UBX_CFG_RXM_t cfg_rxm;
 
     /* parse --verbose and --help */
-    parse_common_args(&argc, argv, 2, 2);
+    parse_common_args(&argc, argv, 1, 1);
 
     log("Waking up GPS");
     write(DEV_FD_OUT, WAKEUP_SEQ, WAKEUP_SEQ_LEN);
