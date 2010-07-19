@@ -131,11 +131,11 @@ void ubx_read(int fd, int (* handle_message)(int, GPS_UBX_HEAD_pt, char *)) {
     }
 }
 
-void ubx_write(int fd, int UBXID, int size, char *payload) {
+char *ubx_construct(int UBXID, int size, char *payload) {
     GPS_UBX_HEAD_t header;
     char chksum1, chksum2;
-    char *buffer;
-
+    char *message;
+    
     header.prefix = GPS_UBX_PREFIX;
     header.classId = UBXID / 256;
     header.msgId = UBXID % 256;
@@ -143,15 +143,25 @@ void ubx_write(int fd, int UBXID, int size, char *payload) {
 
     checksum(&header, payload, &chksum1, &chksum2);
     
-    buffer = malloc(size + 8);
-    memcpy(buffer, &header, 6);
-    memcpy(buffer + 6, payload, size);
-    memcpy(buffer + 6 + size, &chksum1, 1);
-    memcpy(buffer + 6 + size + 1, &chksum2, 1);
+    message = malloc(size + 8);
+    memcpy(message, &header, 6);
+    memcpy(message + 6, payload, size);
+    memcpy(message + 6 + size, &chksum1, 1);
+    memcpy(message + 6 + size + 1, &chksum2, 1);
+
+    return message;
+}
+
+void ubx_write(int fd, int UBXID, int size, char *payload) {
+    char *buffer;
+
+    buffer = ubx_construct(UBXID, size, payload);
 
     if (write(fd, buffer, size + 8) < size + 8) {
         panic("(ubx_write) Can't write to the device");
     }
+
+    free(buffer);
 }
 
 #endif

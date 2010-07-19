@@ -3,6 +3,7 @@
 
 int AID_DATA_TIMEOUT_S = 10;                       
 /* 10 seconds to wait for AID_DATA request */
+/* the same timeout applies for collecting AID data */
 
 /*
     NOTE: some testing is needed to better understand how much 

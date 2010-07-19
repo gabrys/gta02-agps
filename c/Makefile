@@ -23,5 +23,5 @@ help.h: help.h.tpl README.md
 clean:
 	rm -f ${ALL_PROGS} *.o
 
-install:
+install: all
 	cp ${ALL_PROGS} ${BIN_DIR}
