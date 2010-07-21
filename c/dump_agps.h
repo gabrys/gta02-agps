@@ -51,9 +51,9 @@ int dump_agps(int dev_in, int dev_out, char *dump_file) {
     ubx_write(dev_out, UBXID_CFG_MSG, sizeof(GPS_UBX_CFG_MSG_SETCURRENT_t), (char*) &cfg_msg);
 
     /* set alarm. device may be not configured correctly and can not send us valid aid data */
-    /* if it does send them in AID_DATA_TIMEOUT_S seconds, program quits */
+    /* if it does send them in AID_DATA_COLLECT_TIMEOUT_S seconds, program quits */
     signal(SIGALRM, dump_onalarm);
-    alarm(AID_DATA_TIMEOUT_S);
+    alarm(AID_DATA_COLLECT_TIMEOUT_S);
 
     /* start read loop */
     ubx_read(dev_in, dump_handle_message);
