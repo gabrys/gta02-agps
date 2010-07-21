@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 void help() {
-    char *help =
+    const char *help =
 
 "gta02-apgs-dump, gta02-agps-load, gta02-set-power, stdin-serial-set-raw\n"
 "\n"

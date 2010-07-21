@@ -10,7 +10,7 @@ int AID_DATA_TIMEOUT_S = 10;
     accuracy parameters are important for UBX chip.
 */
 
-int POSITION_ACCURACY_MIN_CM = 5 * 1000 * 100; /* 5 km, in cm */
+unsigned int POSITION_ACCURACY_MIN_CM = 5 * 1000 * 100; /* 5 km, in cm */
 /*
     if last recorded position accuracy was less that POSITION_ACCURACY_MIN_CM,
     send POSITION_ACCURACY_MIN_CM as position accuracy.
@@ -18,7 +18,7 @@ int POSITION_ACCURACY_MIN_CM = 5 * 1000 * 100; /* 5 km, in cm */
     This is how far you can go between turning off and on the GPS chip.
 */
 
-int POSITION_ACCURACY_MAX_CM = 200 * 1000 * 100; /* 200 km in cm */
+unsigned int POSITION_ACCURACY_MAX_CM = 200 * 1000 * 100; /* 200 km in cm */
 /*
     if position accuracy is more than POSITION_ACCURACY_MAX_CM,
     don't send the last position to GPS at all.

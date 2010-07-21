@@ -76,7 +76,7 @@ typedef	unsigned int		    L;	//!<  4 byte logical (TRUE or FALSE only)
 typedef struct GPS_UBX_HEAD_s
 {
 	U2 prefix;					//!< Prefix, always #GPS_UBX_PREFIX
-	U1 classId;					//!< UBX Class Id
+	U1 klassId;					//!< UBX Class Id
 	U1 msgId;					//!< UBX Message Id
 	U2 size;					//!< Payload Size
 } GPS_UBX_HEAD_t, *GPS_UBX_HEAD_pt;
@@ -1013,7 +1013,7 @@ This Message's id is #UBXID_CFG_MSG
 
 typedef struct GPS_UBX_CFG_MSG_POLL_s
 {
-	U1  class;                    //!< Message Class
+	U1  klass;                    //!< Message Class
 	U1  msgID;                    //!< Message Identifier
 
 } GPS_UBX_CFG_MSG_POLL_t,*GPS_UBX_CFG_MSG_POLL_pt;
@@ -1037,7 +1037,7 @@ This Message's id is #UBXID_CFG_MSG
 
 typedef struct GPS_UBX_CFG_MSG_s
 {
-	U1  class;                    //!< Message Class
+	U1  klass;                    //!< Message Class
 	U1  msgID;                    //!< Message Identifier
 	U1  rate[4];                  //!< Send rate on I/O Target (4 Targets)
 
@@ -1060,7 +1060,7 @@ This Message's id is #UBXID_CFG_MSG
 
 typedef struct GPS_UBX_CFG_MSG_SETCURRENT_s
 {
-	U1  class;                    //!< Message Class
+	U1  klass;                    //!< Message Class
 	U1  msgID;                    //!< Message Identifier
 	U1  rate;                     //!< Send rate on current Target
 
@@ -1095,7 +1095,7 @@ typedef struct GPS_UBX_CFG_INF_POLL_s
 //! CFG_INF: Set/Get
 /*!
 Information message configuration
-The value of INFMSG_mask<x> below are that each bit represents one of the INFclass messages (Bit 0 for ERROR, Bit 1 for WARNING and so on.). For a completelist, please see the <r href=\"UBX-INF'>Message Class INF</r>.Several configurations can be concatenated to one input message. In thiscase the payload length can be a multiple of the normal length. Output messages from the module contain only one configuration unit. Please note that I/O Targets 0, 1 and 2 correspond to serial ports 0, 1 and 2. I/O target 3 is reserved for future use.
+The value of INFMSG_mask<x> below are that each bit represents one of the INFklass messages (Bit 0 for ERROR, Bit 1 for WARNING and so on.). For a completelist, please see the <r href=\"UBX-INF'>Message Class INF</r>.Several configurations can be concatenated to one input message. In thiscase the payload length can be a multiple of the normal length. Output messages from the module contain only one configuration unit. Please note that I/O Targets 0, 1 and 2 correspond to serial ports 0, 1 and 2. I/O target 3 is reserved for future use.
 
 
 This Message's id is #UBXID_CFG_INF

@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 void help() {
-    char *help =
+    const char *help =
 
 "Only first 6 and last 6 lines of this template are used"
 "Here goes some lines from README :-)"

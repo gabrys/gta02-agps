@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     parse_common_args(&argc, argv, 1, 1);
     
     /* prepare CFG-MSG message */
-    cfg_msg.class = UBXID_NAV_POSECEF / 256;
+    cfg_msg.klass = UBXID_NAV_POSECEF / 256;
     cfg_msg.msgID = UBXID_NAV_POSECEF % 256;
     
     /* request AID_ALM, AID_EPH and AID_HUI */

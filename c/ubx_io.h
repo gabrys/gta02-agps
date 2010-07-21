@@ -8,7 +8,7 @@
 
 #include "ubx.h"
 
-void panic(char *msg) {
+void panic(const char *msg) {
     write(2, msg, strlen(msg));
     write(2, "\n", 1);
     exit(1);
@@ -42,7 +42,7 @@ void checksum(GPS_UBX_HEAD_pt header, char *msg, char *chksum1, char *chksum2) {
 
 int msg_is(GPS_UBX_HEAD_pt header, int UBXID) {
     return header->msgId == UBXID % 256
-        && header->classId == UBXID / 256;
+        && header->klassId == UBXID / 256;
 }
 
 void ubx_read(int fd, int (* handle_message)(int, GPS_UBX_HEAD_pt, char *)) {
@@ -137,13 +137,13 @@ char *ubx_construct(int UBXID, int size, char *payload) {
     char *message;
     
     header.prefix = GPS_UBX_PREFIX;
-    header.classId = UBXID / 256;
+    header.klassId = UBXID / 256;
     header.msgId = UBXID % 256;
     header.size = size;
 
     checksum(&header, payload, &chksum1, &chksum2);
     
-    message = malloc(size + 8);
+    message = (char *) malloc(size + 8);
     memcpy(message, &header, 6);
     memcpy(message + 6, payload, size);
     memcpy(message + 6 + size, &chksum1, 1);

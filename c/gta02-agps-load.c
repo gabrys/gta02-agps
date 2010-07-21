@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
     }
 
     /* prepare CFG-MSG message */
-    cfg_msg.class = UBXID_AID_REQ / 256;
+    cfg_msg.klass = UBXID_AID_REQ / 256;
     cfg_msg.msgID = UBXID_AID_REQ % 256;
     cfg_msg.rate = 1;
 
@@ -78,7 +78,7 @@ int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg) {
         posecef = (GPS_UBX_NAV_POSECEF_pt) msg;
 
         /* construct AID_INI message initialized with 0s */
-        ini = calloc(1, sizeof(GPS_UBX_AID_INI_U5__t));
+        ini = (GPS_UBX_AID_INI_U5__pt) calloc(1, sizeof(GPS_UBX_AID_INI_U5__t));
 
         /* set last known position */
         ini->ecefXOrLat = posecef->ecefX;
