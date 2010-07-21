@@ -1,5 +1,3 @@
-#define DEV_FD_IN 0 /* stdin */
-#define DEV_FD_OUT 1 /* stdout */
 
 int AID_DATA_TIMEOUT_S = 10;                       
 /* 10 seconds to wait for AID_DATA request */

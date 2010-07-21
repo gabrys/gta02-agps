@@ -5,23 +5,24 @@ BIN_DIR=/usr/bin
 # don't remove -fpack-struct from CFLAGS, it's needed
 CFLAGS+=-fpack-struct -Wall
 
-COMMON_H=common.h config.h help.h ubx.h ubx_io.h
-ALL_PROGS=gta02-agps-dump gta02-agps-load gta02-set-power stdin-serial-set-raw
+gta02-gps: common.h config.h dump_agps.h fixnow.h help.h invocation.h load_agps.h parse_args.h setup_serial.h ubx.h ubx_io.h
 
-all: ${ALL_PROGS}
-
-
-gta02-agps-dump: ${COMMON_H}
-gta02-agps-load: ${COMMON_H}
-gta02-set-power: ${COMMON_H}
-
-help.h: help.h.tpl README.md
+help.h: help.h.tpl README.md Makefile
 	head -n 6 help.h.tpl > help.h
-	head -n 59 README.md | sed -e 's/"/\\"/g' -e 's/^/"/' -e 's/$$/\\n"/' >> help.h
+	head -n 76 README.md | sed -e 's/"/\\"/g' -e 's/^/"/' -e 's/$$/\\n"/' >> help.h
 	tail -n 6 help.h.tpl >> help.h
 
-clean:
-	rm -f ${ALL_PROGS} *.o
+invocation.h: invocation.h.tpl README.md Makefile
+	head -n 6 invocation.h.tpl > invocation.h
+	head -n 11 README.md | tail -n 6 | sed -e 's/"/\\"/g' -e 's/^/"/' -e 's/$$/\\n"/' >> invocation.h
+	tail -n 6 invocation.h.tpl >> invocation.h
 
-install: all
-	cp ${ALL_PROGS} ${BIN_DIR}
+clean:
+	rm -f gta02-gps *.o
+
+install: gta02-gps
+	cp gta02-gps ${BIN_DIR}
+
+uninstall:
+	rm -f ${BIN_DIR}/gta02-gps
+

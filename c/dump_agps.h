@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <stdio.h>
 
 #include "common.h"
 
@@ -15,7 +16,7 @@ int ecef_got = 0;
 char dump_buffer_start[16000];
 char *dump_buffer = dump_buffer_start;
 
-int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg);
+int dump_handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg);
 
 void save_to_buffer(int UBXID, int size, char *payload) {
     char *msg;
@@ -27,48 +28,45 @@ void save_to_buffer(int UBXID, int size, char *payload) {
     free(msg);
 } 
 
-void onalarm(int signum) {
+void dump_onalarm(int signum) {
     log("Device has not sent aid data in specified time. Quitting.");
     exit(2);
 }
 
-int main(int argc, char **argv) {
+int dump_agps(int dev_in, int dev_out, char *dump_file) {
     GPS_UBX_CFG_MSG_SETCURRENT_t cfg_msg;
     int dump_fd;
-    
-    /* parse --help and --verbose */
-    parse_common_args(&argc, argv, 1, 1);
     
     /* prepare CFG-MSG message */
     cfg_msg.klass = UBXID_NAV_POSECEF / 256;
     cfg_msg.msgID = UBXID_NAV_POSECEF % 256;
     
     /* request AID_ALM, AID_EPH and AID_HUI */
-    ubx_write(DEV_FD_OUT, UBXID_AID_HUI, 0, 0);
-    ubx_write(DEV_FD_OUT, UBXID_AID_ALM, 0, 0);
-    ubx_write(DEV_FD_OUT, UBXID_AID_EPH, 0, 0);
+    ubx_write(dev_out, UBXID_AID_HUI, 0, 0);
+    ubx_write(dev_out, UBXID_AID_ALM, 0, 0);
+    ubx_write(dev_out, UBXID_AID_EPH, 0, 0);
     
     /* enable ECEF messages */
     cfg_msg.rate = 8;
-    ubx_write(DEV_FD_OUT, UBXID_CFG_MSG, sizeof(GPS_UBX_CFG_MSG_SETCURRENT_t), (char*) &cfg_msg);
+    ubx_write(dev_out, UBXID_CFG_MSG, sizeof(GPS_UBX_CFG_MSG_SETCURRENT_t), (char*) &cfg_msg);
 
     /* set alarm. device may be not configured correctly and can not send us valid aid data */
     /* if it does send them in AID_DATA_TIMEOUT_S seconds, program quits */
-    signal(SIGALRM, onalarm);
+    signal(SIGALRM, dump_onalarm);
     alarm(AID_DATA_TIMEOUT_S);
 
     /* start read loop */
-    ubx_read(DEV_FD_IN, handle_message);
+    ubx_read(dev_in, dump_handle_message);
 
     /* disable alarm */
     alarm(0);
 
     /* disable ECEF messages */
     cfg_msg.rate = 0;
-    ubx_write(DEV_FD_OUT, UBXID_CFG_MSG, sizeof(GPS_UBX_CFG_MSG_SETCURRENT_t), (char*) &cfg_msg);
+    ubx_write(dev_out, UBXID_CFG_MSG, sizeof(GPS_UBX_CFG_MSG_SETCURRENT_t), (char*) &cfg_msg);
 
     /* save from buffer to file */
-    dump_fd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    dump_fd = open(dump_file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
     if (dump_fd < 0) {
         perror("Can't open file");
         return 1;
@@ -83,7 +81,7 @@ int main(int argc, char **argv) {
     Dump NAV-POSECEF, AID-ALM, AID-EPH, AID-HUI, AID-DATA messages to file
 */
 
-int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg) {
+int dump_handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg) {
     if (msg_is(header, UBXID_AID_ALM)) {
         alm_got++;
         if (header->size == 40) {

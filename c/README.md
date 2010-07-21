@@ -1,4 +1,14 @@
-gta02-apgs-dump, gta02-agps-load, gta02-set-power, stdin-serial-set-raw
+gta02-gps
+
+INVOCATION
+==========
+
+    gta02-gps --help
+    gta02-gps [--verbose] --setup-serial <device-file>
+    gta02-gps [--verbose] [--setup-serial] <device-file> --load-agps <agps-path>
+    gta02-gps [--verbose] [--setup-serial] <device-file> --dump-agps <agps-path>
+    gta02-gps [--verbose] [--setup-serial] <device-file> --sleep
+    gta02-gps [--verbose] [--setup-serial] <device-file> --wake-up
 
 INFORMATION
 ===========
@@ -10,33 +20,40 @@ needs AGPS information.
 The AGPS information can be grabbed from GPS chip
 when it has fix (reports valid position). Do:
 
-    gta02-agps-dump agpsdata < /dev/ttySAC1 > /dev/ttySAC1
+    gta02-gps /dev/ttySAC1 --setup-serial --dump-agps agpsdata
 
 This will save AGPS data read from chip into the
-file "agpsdata".
+file "agpsdata" (it can be passed as a full path).
 
 This data can be loaded into the GPS after it is
 stopped and started again. This should improve TTFF.
 
 To load data from agpsdata file issue:
 
-    gta02-agps-load agpsdata < /dev/ttySAC1 > /dev/ttySAC1
+    gta02-gps /dev/ttySAC1 --setup-serial --load-agps agpsdata
 
 Passing -h or --help argument gives you this message.
+
+    gta02-gps --help
 
 Passing -v or --verbose argument prints some debug
 information while operating.
 
-Before using this programs (especially gta02-agps-dump)
-you need to properly set the serial port. You can
-do this by:
+You can use "-" instead of the device name, to let the
+application communicate through standard input/output.
+For example:
+
+    gta02-gps - --load-agps agpsdata
+
+This may be useful for debugging. In this case it
+may be not possible to set up the serial interface
+of the device, so may need to omit --setup-serial
+option. To do the same as --setup-serial does, issue:
 
     stty -F /dev/ttySAC1 raw
 
-In case you do not have stty program, you can use
-the one supplied in the package:
-
-    stdin-serial-set-raw < /dev/ttySAC1
+FIXNOW(R)
+=========
 
 In order to get even faster fixes you can enable
 FixNow(R) technology. When you intend to disable
@@ -46,16 +63,37 @@ you TTFF of 10 seconds range.
 
 Instead of disabling GPS, do:
 
-    gta02-set-power fixnow > /dev/ttySAC1
+    gta02-gps /dev/ttySAC1 --setup-serial --sleep
 
 Instead of enabling it again, do:
 
-    gta02-set-power max > /dev/ttySAC1
+    gta02-gps /dev/ttySAC1 --setup-serial --wake-up
 
 You need to have GPS powered on to do this kind
 of things. Note this will drain some current, but
 it should be minimal (comparing to GPS fully powered
 on).
+
+SUSPEND
+=======
+
+Putting your FreeRunner into suspend makes GPS chip
+forget AGPS data and the position/time, so after
+waking up, you have a true cold start of the GPS.
+
+Dumping AGPS data before suspending FreeRunner and
+loading the same data after waking up makes it a
+warm start.
+
+You can also keep GPS powered during suspend, by
+using om utility:
+
+    om gps keep-on-in-suspend 1
+
+This drains your battery, so may want to use it in
+tandem with gta02-gps /dev/ttySAC1 --setup-serial
+--sleep. This is not yet heavily tested, but should
+work.
 
 STORAGE FORMAT
 ==============
@@ -75,8 +113,9 @@ COMPILING
 
 Compile programs with:
 
-    gcc -falign-struct gta02-agps-dump.c -o gta02-agps-dump
-    gcc -falign-struct gta02-agps-load.c -o gta02-load-dump
+    gcc -falign-struct gta02-gps.c -o gta02-gps
+
+The code is also compilable by g++ C++ compiler.
 
 -falign-struct is needed, because one of the structs
 in ubx.h is not properly aligned and so will be

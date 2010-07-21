@@ -1,9 +1,9 @@
 #include <termios.h>
 #include <unistd.h>
 
-int main() {
+void setup_serial(int fd) {
     struct termios termios_p;
+    tcgetattr(fd, &termios_p);
     cfmakeraw(&termios_p);
-    tcsetattr(0, 0, &termios_p);
-    return 0;
+    tcsetattr(fd, 0, &termios_p);
 }

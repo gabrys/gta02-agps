@@ -3,27 +3,29 @@
 #include <errno.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <stdio.h>
 
 #include "common.h"
 
-int DUMP_FD;
+int DEV_OUT_FD;
 
-void onalarm(int signum) {
+void load_onalarm(int signum) {
     log("Device has not asked for aid data. Probably it is already set up.");
     exit(2);
 }
 
-int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg);
+int wait_for_aid_data_request(int fd, GPS_UBX_HEAD_pt header, char *msg);
+int handle_message_from_file(int fd, GPS_UBX_HEAD_pt header, char *msg);
 
-int main(int argc, char **argv) {
+int load_agps(int dev_in, int dev_out, char *dump_file) {
+    int dump_fd;
     GPS_UBX_CFG_MSG_SETCURRENT_t cfg_msg;
-    
-    /* parse --verbose and --help */
-    parse_common_args(&argc, argv, 1, 1);
 
+    DEV_OUT_FD = dev_out;
+    
     /* open dump file */
-    DUMP_FD = open(argv[1], O_RDONLY);
-    if (DUMP_FD < 0) {
+    dump_fd = open(dump_file, O_RDONLY);
+    if (dump_fd < 0) {
         perror("Cannot open file");
         return 1;
     }
@@ -33,16 +35,24 @@ int main(int argc, char **argv) {
     cfg_msg.msgID = UBXID_AID_REQ % 256;
     cfg_msg.rate = 1;
 
-    ubx_write(DEV_FD_OUT, UBXID_CFG_MSG, sizeof(GPS_UBX_CFG_MSG_SETCURRENT_t), (char*) &cfg_msg);
+    ubx_write(DEV_OUT_FD, UBXID_CFG_MSG, sizeof(GPS_UBX_CFG_MSG_SETCURRENT_t), (char*) &cfg_msg);
     
     /* set alarm. device may be already initialized and doesn't need any aid data */
     /* if it does not request it in AID_DATA_TIMEOUT_S seconds, program quits */
-    signal(SIGALRM, onalarm);
+    signal(SIGALRM, load_onalarm);
     alarm(AID_DATA_TIMEOUT_S);
     
-    ubx_read(DEV_FD_IN, handle_message);
+    ubx_read(dev_in, wait_for_aid_data_request);
+
+    /* got request for aid data from device */    
+    /* disable alarm */
+    alarm(0);
+
+    /* read stuff from file and feed it to device */
+    ubx_read(dump_fd, handle_message_from_file);
     
-    close(DUMP_FD);
+    /* clean up */
+    close(dump_fd);
     return 0;
 }
 
@@ -51,29 +61,31 @@ int main(int argc, char **argv) {
     AID_ALM, AID_ELM, AID_HUI and NAV_POSECEF from file
 */
 
-int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg) {
+int wait_for_aid_data_request(int fd, GPS_UBX_HEAD_pt header, char *msg) {
+    if (msg_is(header, UBXID_AID_DATA)) {
+        return 1;
+    }
+    return 0;
+}
+
+int handle_message_from_file(int fd, GPS_UBX_HEAD_pt header, char *msg) {
     GPS_UBX_AID_INI_U5__pt ini;
     GPS_UBX_NAV_POSECEF_pt posecef;
     unsigned int gps_time, gps_week, gps_second;
     
-    if (fd == DEV_FD_IN && msg_is(header, UBXID_AID_DATA)) {
-        /* got request for data, let's read it from file */
-        ubx_read(DUMP_FD, handle_message);
-        return 1;
-    }
-    if (fd == DUMP_FD && msg_is(header, UBXID_AID_ALM)) {
+    if (msg_is(header, UBXID_AID_ALM)) {
         log("Sending AID_ALM message (almanac info for one sattelite) to GPS");
-        ubx_write(DEV_FD_OUT, UBXID_AID_ALM, header->size, msg);
+        ubx_write(DEV_OUT_FD, UBXID_AID_ALM, header->size, msg);
     }
-    if (fd == DUMP_FD && msg_is(header, UBXID_AID_EPH)) {
+    if (msg_is(header, UBXID_AID_EPH)) {
         log("Sending AID_EPH message (ephemeris info for one sattelite) to GPS");
-        ubx_write(DEV_FD_OUT, UBXID_AID_EPH, header->size, msg);
+        ubx_write(DEV_OUT_FD, UBXID_AID_EPH, header->size, msg);
     }
-    if (fd == DUMP_FD && msg_is(header, UBXID_AID_HUI)) {
+    if (msg_is(header, UBXID_AID_HUI)) {
         log("Sending AID_HUI message (health information, leap seconds, etc) to GPS");
-        ubx_write(DEV_FD_OUT, UBXID_AID_EPH, header->size, msg);
+        ubx_write(DEV_OUT_FD, UBXID_AID_EPH, header->size, msg);
     }
-    if (fd == DUMP_FD && msg_is(header, UBXID_NAV_POSECEF)) {
+    if (msg_is(header, UBXID_NAV_POSECEF)) {
         /* get some data from message and construct AID_INI message */
         posecef = (GPS_UBX_NAV_POSECEF_pt) msg;
 
@@ -108,7 +120,7 @@ int handle_message(int fd, GPS_UBX_HEAD_pt header, char *msg) {
         
         /* finally send time and position info */
         log("Sending AID_INI message (known position and time) to GPS");
-        ubx_write(DEV_FD_OUT, UBXID_AID_INI, sizeof(GPS_UBX_AID_INI_U5__t), (char *) ini);
+        ubx_write(DEV_OUT_FD, UBXID_AID_INI, sizeof(GPS_UBX_AID_INI_U5__t), (char *) ini);
         
         /* this should be the last message in file */
         return 1;
