@@ -113,13 +113,13 @@ COMPILING
 
 Compile programs with:
 
-    gcc -falign-struct gta02-gps.c -o gta02-gps
+    gcc -fpack-struct gta02-gps.c -o gta02-gps
 
 The code is also compilable by g++ C++ compiler.
 
--falign-struct is needed, because one of the structs
+-fpack-struct is needed, because one of the structs
 in ubx.h is not properly aligned and so will be
-padded if -falign-struct is not passed.
+padded if -fpack-struct is not passed.
 
 Makefile should do the job, just type:
 
